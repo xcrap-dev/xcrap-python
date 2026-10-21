@@ -146,6 +146,59 @@ parser = JsonParser(content)
 data = parser.extract_model(ProjectModel) # {'name': 'Xcrap', 'tags': ['python', 'scraping']}
 ```
 
+### 🕷️ Spiders
+
+Inspirados no Scrapy, mas adaptados ao Xcrap: tudo é `asyncio` nativo, o client (`HttpxClient`, `CurlCffiClient`, `PlaywrightClient`) já cuida de retry, proxy e user agent (por isso não há *downloader middlewares*) e a extração continua sendo feita pelos modelos declarativos.
+
+```python
+from xcrap.extractor import css
+from xcrap.spiders import DropItem, ItemPipeline, JsonLinesPipeline, Spider
+
+
+class QuotesSpider(Spider):
+    name = "quotes"
+    start_urls = ["http://quotes.toscrape.com"]
+    concurrency = 4
+    request_delay = 200  # ms entre requisições
+    max_retries = 2
+
+    async def parse(self, response):
+        parser = response.as_html_parser()
+
+        for quote in parser.extract_models(QuoteModel, css("div.quote")):
+            yield quote  # dict ou modelo pydantic = item
+
+        for href in parser.extract_values(css("li.next a::attr(href)")):
+            yield response.follow(href)  # Request = continua o crawl
+            # response.follow(href, callback="parse_other") para outro callback
+
+
+class NoEmptyText(ItemPipeline):
+    async def process_item(self, item, spider):
+        if not item["text"]:
+            raise DropItem("sem texto")
+        return item
+
+
+stats = QuotesSpider(pipelines=[NoEmptyText(), JsonLinesPipeline("quotes.jsonl")]).run()
+```
+
+- `await spider.crawl()` / `spider.run()` executam e devolvem `SpiderStats`; `await spider.collect()` devolve os itens e `async for item in spider.stream()` os entrega conforme chegam.
+- `Request` aceita `callback`/`errback` (função ou nome do método), `meta`, `priority`, `dont_filter`, `max_retries` e `retry_delay`.
+- Configurações da classe (ou kwargs do construtor): `concurrency`, `request_delay`, `max_retries`, `retry_delay`, `headers`, `max_requests`, `max_depth`, `dedupe`.
+- Respostas não-2xx vão para o `errback` do request ou para `Spider.on_error`; exceções em callbacks são logadas e contadas, sem parar o crawl.
+- `ModelSpider` dispensa o `parse`: defina `model`, e opcionalmente `items_query` (um item por elemento) e `follow_query` (links a seguir).
+
+```python
+class QuotesSpider(ModelSpider):
+    start_urls = ["http://quotes.toscrape.com"]
+    model = QuoteModel
+    items_query = css("div.quote")
+    follow_query = css("li.next a::attr(href)")
+```
+
+Para paginação estática, use `start_urls = paginator.dump()` com o `StaticPaginator`.
+
 ## 🛠️ Desenvolvimento
 
 Para rodar os testes e verificar a cobertura:
