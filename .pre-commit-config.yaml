@@ -1,0 +1,9 @@
+# Lints and formats staged files on every `git commit`.
+# One-time setup:  pipx install pre-commit && pre-commit install
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.15.5
+    hooks:
+      - id: ruff-check
+        args: [--fix]
+      - id: ruff-format

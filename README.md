@@ -1,5 +1,13 @@
 # Xcrap for Python
 
+[![PyPI](https://img.shields.io/pypi/v/xcrap.svg)](https://pypi.org/project/xcrap/)
+[![Python versions](https://img.shields.io/pypi/pyversions/xcrap.svg)](https://pypi.org/project/xcrap/)
+[![Downloads](https://img.shields.io/pypi/dm/xcrap.svg)](https://pypi.org/project/xcrap/)
+[![CI](https://github.com/xcrap-dev/xcrap-python/actions/workflows/ci.yml/badge.svg)](https://github.com/xcrap-dev/xcrap-python/actions/workflows/ci.yml)
+[![Coverage](https://codecov.io/gh/xcrap-dev/xcrap-python/graph/badge.svg)](https://codecov.io/gh/xcrap-dev/xcrap-python)
+[![Code style: Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+[![License: MIT](https://img.shields.io/pypi/l/xcrap.svg)](LICENSE)
+
 **Xcrap is a modern web scraping framework.** It gives you interchangeable HTTP and browser clients, declarative extraction for HTML, JSON and Markdown, and Scrapy-inspired spiders for crawling whole sites — with one consistent, `asyncio`-native API.
 
 This is the Python port of the Node.js [Xcrap](https://github.com/Xcrap-Cloud) framework, keeping the same concepts and vocabulary so scrapers translate between the two.
@@ -208,11 +216,19 @@ model = create_extraction_model(
 ## Development
 
 ```bash
-poetry install
-poetry run pytest                                       # tests
-poetry run pytest --cov=xcrap --cov-report=term-missing # with coverage
-poetry run ruff check .
+poetry install --all-extras                              # everything, including the optional clients
+poetry run pytest --cov                                  # tests; fails below 100% coverage
+poetry run ruff check .                                  # lint
+poetry run ruff format .                                 # format
 ```
+
+Lint, formatting, tests and coverage also run on every push and pull request ([CI](.github/workflows/ci.yml)). To lint and format automatically on each commit, install the [pre-commit](https://pre-commit.com) hook once:
+
+```bash
+pipx install pre-commit && pre-commit install
+```
+
+See the [changelog](CHANGELOG.md) for release notes.
 
 The example scripts hit real websites ([quotes.toscrape.com](https://quotes.toscrape.com), [books.toscrape.com](https://books.toscrape.com), the GitHub API…) and are not part of the test suite.
 
