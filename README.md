@@ -228,8 +228,6 @@ Lint, formatting, tests and coverage also run on every push and pull request ([C
 pipx install pre-commit && pre-commit install
 ```
 
-See the [changelog](CHANGELOG.md) for release notes.
-
 The example scripts hit real websites ([quotes.toscrape.com](https://quotes.toscrape.com), [books.toscrape.com](https://books.toscrape.com), the GitHub API…) and are not part of the test suite.
 
 ---
