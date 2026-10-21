@@ -1,4 +1,4 @@
-from xcrap.extractor import HtmlParser, HtmlExtractionModel, HtmlBaseField
+from xcrap.extractor import HtmlBaseField, HtmlExtractionModel, HtmlParser
 from xcrap.extractor.query_builders import css, xpath
 
 

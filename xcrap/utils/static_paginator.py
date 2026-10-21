@@ -82,15 +82,8 @@ class StaticPaginator:
         Generates and returns a list of URLs from the current page up to last_page
         (optionally capped by limit).
         """
-        max_page = (
-            min(self.last_page, self.current_page + limit - 1)
-            if limit is not None
-            else self.last_page
-        )
-        return [
-            self.generate_url(self.template_url, page)
-            for page in range(self.current_page, max_page + 1)
-        ]
+        max_page = min(self.last_page, self.current_page + limit - 1) if limit is not None else self.last_page
+        return [self.generate_url(self.template_url, page) for page in range(self.current_page, max_page + 1)]
 
     @classmethod
     async def create_with_tracking(

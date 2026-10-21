@@ -55,9 +55,7 @@ async def test_follows_links_dedupes_and_collects_items():
     spider = ChainSpider(client=FakeClient(PAGES))
     items = await spider.collect()
 
-    assert sorted(map(str, items)) == sorted(
-        map(str, [{"v": "1", "depth": 0}, {"v": "2", "depth": 1}, {"detail": "detail"}])
-    )
+    assert sorted(map(str, items)) == sorted(map(str, [{"v": "1", "depth": 0}, {"v": "2", "depth": 1}, {"detail": "detail"}]))
     assert spider.stats.requests_made == 3
     assert spider.stats.requests_filtered == 1  # p2 links back to "/"
     assert spider.stats.items_scraped == 3

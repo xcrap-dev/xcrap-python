@@ -1,5 +1,4 @@
 import html
-from typing import Optional
 
 try:
     import markdown as md_lib
@@ -22,10 +21,7 @@ def render_markdown_to_html(source: str) -> str:
         extensions=["extra", "tables", "fenced_code", "toc", "sane_lists"],
     )
     decoded = html.unescape(rendered).replace("\u00a0", " ")
-    return (
-        f"<!DOCTYPE html><html lang=\"en\"><head><title>Markdown Document</title></head>"
-        f"<body>{decoded}</body></html>"
-    )
+    return f'<!DOCTYPE html><html lang="en"><head><title>Markdown Document</title></head><body>{decoded}</body></html>'
 
 
 class MarkdownParser(HtmlParser):

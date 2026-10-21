@@ -2,7 +2,9 @@ from xcrap.utils.resolve import resolve
 
 
 def test_resolve_should_resolve_fn() -> None:
-    fn = lambda: 0
+    def fn() -> int:
+        return 0
+
     expected = 0
     data = resolve(fn)
 

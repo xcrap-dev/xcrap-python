@@ -1,6 +1,7 @@
-from xcrap.extractor import HtmlParser, HtmlExtractionModel, HtmlBaseField, HtmlNestedField
-from xcrap.extractor.query_builders import css, xpath
 import pytest
+
+from xcrap.extractor import HtmlBaseField, HtmlExtractionModel, HtmlNestedField, HtmlParser
+from xcrap.extractor.query_builders import css, xpath
 
 parser = HtmlParser("""
 <html>
@@ -231,6 +232,7 @@ def test_extraction_model_abstract_call() -> None:
 def test_html_extraction_model_multiple_no_results_no_default():
     class MyExtractionModel(HtmlExtractionModel):
         items = HtmlBaseField(query=css(".missing"), multiple=True)
+
     data = parser.extract_model(MyExtractionModel)
     assert data["items"] == []
 
@@ -238,18 +240,21 @@ def test_html_extraction_model_multiple_no_results_no_default():
 def test_html_extraction_model_nested_with_model_type():
     class SubModel(HtmlExtractionModel):
         text = HtmlBaseField(query=css("h1::text"))
+
     class MyModel(HtmlExtractionModel):
         sub = HtmlNestedField(model=SubModel)
+
     data = parser.extract_model(MyModel)
     assert data["sub"]["text"] == "This is a heading"
 
 
 def test_html_extraction_model_with_extractors():
     parser_with_link = HtmlParser('<a href="https://xcrap.com">Link</a>')
+
     class MyModel(HtmlExtractionModel):
         link = HtmlBaseField(query=css("a"), extractor=lambda el: el.attrib.get("href"))
         tags = HtmlBaseField(query=css("a"), multiple=True, extractor=lambda el: el.root.tag)
-    
+
     data = parser_with_link.extract_model(MyModel)
     assert data["link"] == "https://xcrap.com"
     assert data["tags"] == ["a"]

@@ -88,7 +88,7 @@ class PlaywrightClient(HttpClientBase):
                     )
                     page: Page = await context.new_page()
                     timeout_res = page.set_default_timeout(self.timeout)
-                    
+
                     if asyncio.iscoroutine(timeout_res):
                         await timeout_res
 

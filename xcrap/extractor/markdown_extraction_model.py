@@ -1,4 +1,5 @@
 from typing import Any, Dict, Optional
+
 from parsel import Selector
 
 from .html_extraction_model import HtmlExtractionField, HtmlExtractionModel

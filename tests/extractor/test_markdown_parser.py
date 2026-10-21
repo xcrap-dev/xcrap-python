@@ -68,5 +68,5 @@ def test_http_response_as_markdown_and_json_parser():
     resp_json = HttpResponse(status=200, status_text="OK", body=json_content, headers={})
     json_parser = resp_json.as_json_parser()
     from xcrap.extractor.query_builders import jmes_path
-    assert json_parser.extract_value(jmes_path("greeting")) == "hello"
 
+    assert json_parser.extract_value(jmes_path("greeting")) == "hello"

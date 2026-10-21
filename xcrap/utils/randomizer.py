@@ -50,10 +50,7 @@ class Randomizer(Generic[T]):
         Optionally filter by browser type ('chrome', 'firefox', 'safari', 'edge').
         """
         if browser:
-            filtered = [
-                ua for ua in MODERN_USER_AGENTS
-                if browser.lower() in ua.lower()
-            ]
+            filtered = [ua for ua in MODERN_USER_AGENTS if browser.lower() in ua.lower()]
             if filtered:
                 return random.choice(filtered)
         return random.choice(MODERN_USER_AGENTS)

@@ -1,6 +1,7 @@
-from typing import Any, Optional
-import jmespath
 import json
+from typing import Any, Optional
+
+import jmespath
 
 from .json_extraction_model import JsonExtractionModel
 from .query_builders import QueryConfig

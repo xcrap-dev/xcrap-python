@@ -1,8 +1,8 @@
 from unittest.mock import AsyncMock
+
 import pytest
 
 from xcrap.core.errors import (
-    InvalidPageValueError,
     InvalidUrlError,
     PageOutOfRangeError,
     PageParsingFailureError,

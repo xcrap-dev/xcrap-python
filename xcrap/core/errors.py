@@ -1,5 +1,6 @@
 class XcrapError(Exception):
     """Base exception for all Xcrap errors."""
+
     pass
 
 
@@ -8,8 +9,7 @@ class DependencyMissingError(ImportError, XcrapError):
 
     def __init__(self, package_name: str, extra_name: str) -> None:
         super().__init__(
-            f"The '{package_name}' package is required to use this feature. "
-            f"Install it with: pip install xcrap[{extra_name}]"
+            f"The '{package_name}' package is required to use this feature. Install it with: pip install xcrap[{extra_name}]"
         )
         self.package_name = package_name
         self.extra_name = extra_name
@@ -25,6 +25,7 @@ class EmptyListError(XcrapError):
 
 class StaticPaginatorError(XcrapError):
     """Base exception for static paginator operations."""
+
     pass
 
 
@@ -48,6 +49,7 @@ class PageOutOfRangeError(StaticPaginatorError):
 
 class TrackingError(XcrapError):
     """Base exception for automatic tracking failures in pagination."""
+
     pass
 
 

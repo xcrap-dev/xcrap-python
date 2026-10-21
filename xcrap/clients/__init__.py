@@ -12,5 +12,3 @@ __all__ = [
     "SeleniumClient",
     "SeleniumBaseClient",
 ]
-
-

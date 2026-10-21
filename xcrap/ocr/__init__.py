@@ -1,6 +1,6 @@
 import io
 from pathlib import Path
-from typing import Any, Callable, Optional, Union
+from typing import Any, Callable, Union
 
 try:
     from PIL import Image
@@ -49,6 +49,7 @@ def image_text_extractor(
     Factory creating an extractor callable to be used inside HtmlBaseField.
     Accepts element, attribute value (URL/base64/path), or bytes.
     """
+
     def _extractor(val: Any) -> str:
         # If val is a Parsel Selector, try extracting src or value
         if hasattr(val, "attrib"):

@@ -68,6 +68,9 @@ skip-magic-trailing-comma = false
 [tool.ruff.lint]
 select = ["E", "F", "I"]
 
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["E501"]
+
 [tool.ruff.lint.isort]
 known-first-party = ["xcrap"]
 section-order = [
@@ -82,3 +85,10 @@ combine-as-imports = true
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
+
+[tool.coverage.run]
+source = ["xcrap"]
+
+[tool.coverage.report]
+fail_under = 100
+show_missing = true

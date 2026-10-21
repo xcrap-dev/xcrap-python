@@ -1,4 +1,5 @@
 from unittest.mock import AsyncMock, MagicMock, patch
+
 import pytest
 
 from xcrap.clients.curl_cffi import CurlCffiClient

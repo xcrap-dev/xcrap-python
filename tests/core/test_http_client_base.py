@@ -1,6 +1,8 @@
-import pytest
 import asyncio
-from xcrap.core.http_client_base import HttpClientBase, ExecuteRequestOptions
+
+import pytest
+
+from xcrap.core.http_client_base import ExecuteRequestOptions, HttpClientBase
 from xcrap.core.http_response import HttpResponse
 
 

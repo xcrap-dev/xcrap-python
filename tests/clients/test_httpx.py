@@ -1,8 +1,10 @@
-import pytest
-import httpx
-from unittest.mock import AsyncMock, patch, MagicMock
-from xcrap.clients.httpx import HttpxClient
 import asyncio
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import httpx
+import pytest
+
+from xcrap.clients.httpx import HttpxClient
 
 
 @pytest.mark.asyncio
@@ -190,6 +192,7 @@ async def test_httpx_client_fetch_many_hit_gather() -> None:
         assert len(results) == 1
         assert results[0].body == "Data"
 
+
 @pytest.mark.asyncio
 async def test_httpx_client_proxy_url() -> None:
     with patch("httpx.AsyncClient") as mock_client_class:
@@ -203,6 +206,7 @@ async def test_httpx_client_proxy_url() -> None:
         mock_instance.request.assert_called_once()
         args, kwargs = mock_instance.request.call_args
         assert kwargs["url"] == "http://proxy/http://test.com"
+
 
 @pytest.mark.asyncio
 async def test_httpx_client_custom_headers() -> None:

@@ -1,4 +1,5 @@
 from typing import Any, Callable, Dict, Optional, Type, Union
+
 from parsel import Selector
 from pydantic import BaseModel
 
