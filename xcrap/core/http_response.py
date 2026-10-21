@@ -49,6 +49,14 @@ class HttpResponse:
     def as_html_parser(self) -> HtmlParser:
         return HtmlParser(self.body)
 
+    def as_json_parser(self):
+        from ..extractor.json_parser import JsonParser
+        return JsonParser(self.body)
+
+    def as_markdown_parser(self):
+        from ..extractor.markdown_parser import MarkdownParser
+        return MarkdownParser(self.body)
+
 
 __all__ = [
     "HttpResponse",
