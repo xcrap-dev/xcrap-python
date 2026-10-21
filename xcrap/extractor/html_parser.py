@@ -11,6 +11,10 @@ class HtmlParser(SourceParser):
     def __init__(self, content: str) -> None:
         self.selector = Selector(text=content)
 
+    @property
+    def root(self) -> Selector:
+        return self.selector
+
     def extract_value(self, query: QueryConfig, default: Optional[str] = None) -> Optional[str]:
         elements = self._select_elements(query)
         result = elements.get()
