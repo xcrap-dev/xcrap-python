@@ -19,6 +19,7 @@ markdown = "^3.11.2"
 curl-cffi = { version = ">=0.7.0", optional = true }
 playwright = { version = ">=1.40.0", optional = true }
 selenium = { version = ">=4.20.0", optional = true }
+seleniumbase = { version = ">=4.30.0", optional = true }
 pytesseract = { version = ">=0.3.10", optional = true }
 pillow = { version = ">=10.0.0", optional = true }
 
@@ -26,8 +27,9 @@ pillow = { version = ">=10.0.0", optional = true }
 curl = ["curl-cffi"]
 playwright = ["playwright"]
 selenium = ["selenium"]
+seleniumbase = ["seleniumbase"]
 ocr = ["pytesseract", "pillow"]
-all = ["curl-cffi", "playwright", "selenium", "pytesseract", "pillow"]
+all = ["curl-cffi", "playwright", "selenium", "seleniumbase", "pytesseract", "pillow"]
 
 
 
