@@ -1,154 +1,80 @@
 # Xcrap for Python
 
-Xcrap é um framework originalmente feito para Node.js, mas, digamos que eu também sou um desenvolvedor Python e, estava um pouco entediado; por isso, resolvi fazer uma versão para Python.
+**Xcrap is a modern web scraping framework.** It gives you interchangeable HTTP and browser clients, declarative extraction for HTML, JSON and Markdown, and Scrapy-inspired spiders for crawling whole sites — with one consistent, `asyncio`-native API.
 
-Ainda está em fase experimental, mas já conta com funcionalidades poderosas portadas da versão original em TypeScript, garantindo paridade entre os ecossistemas.
+This is the Python port of the Node.js [Xcrap](https://github.com/Xcrap-Cloud) framework, keeping the same concepts and vocabulary so scrapers translate between the two.
 
-## 🚀 Como funciona
+- **Declarative extraction** — describe the shape of your data with models, not loops of selectors.
+- **Interchangeable clients** — `httpx`, `curl-cffi` (anti-bot TLS impersonation), Playwright and Selenium behind one interface.
+- **Every format, and formats inside formats** — HTML (CSS/XPath), JSON (JMESPath), Markdown; e.g. Markdown inside JSON inside a `<script>` tag.
+- **Spiders** — scheduler, de-duplication, concurrency, throttling, retries, pipelines and stats.
+- **Configuration-driven** — build clients and models from JSON with factories.
+- **Batteries included** — user-agent/proxy rotation, static pagination, AES response decryption, OCR.
 
-A ideia é ser declarativo e fácil. Veja um exemplo de como você já pode usar o `xcrap` para extrair dados estruturados:
+📚 **Full documentation: [docs/](docs/README.md)** · 🧪 **Runnable examples: [examples/](examples/README.md)**
+
+## Installation
+
+Requires Python 3.12+.
+
+```bash
+pip install xcrap
+```
+
+Optional extras:
+
+```bash
+pip install "xcrap[curl]"        # CurlCffiClient: TLS fingerprint impersonation (Cloudflare & co.)
+pip install "xcrap[playwright]"  # PlaywrightClient: JavaScript rendering (then: playwright install chromium)
+pip install "xcrap[selenium]"    # SeleniumClient: WebDriver automation
+pip install "xcrap[ocr]"         # Text from images (requires the Tesseract binary)
+pip install "xcrap[all]"         # everything
+```
+
+## Quick start
 
 ```python
-from xcrap.extractor import HtmlExtractionModel, HtmlBaseField, HtmlNestedField, css
-from xcrap.clients import HttpxClient
 import asyncio
 
-# 1. Defina seus modelos de forma declarativa
+from xcrap.clients import HttpxClient
+from xcrap.extractor import HtmlBaseField, HtmlExtractionModel, HtmlNestedField, css
+
+
+# 1. Describe your data declaratively
 class AuthorModel(HtmlExtractionModel):
     name = HtmlBaseField(query=css("small.author::text"))
     link = HtmlBaseField(query=css("a::attr(href)"))
 
+
 class QuoteModel(HtmlExtractionModel):
     text = HtmlBaseField(query=css("span.text::text"))
-    # Modelos aninhados sem esforço!
-    author = HtmlNestedField(model=AuthorModel) 
+    author = HtmlNestedField(model=AuthorModel)           # nested models are effortless
     tags = HtmlBaseField(query=css("div.tags a.tag::text"), multiple=True)
+
 
 class QuotesPageModel(HtmlExtractionModel):
     quotes = HtmlNestedField(query=css("div.quote"), model=QuoteModel, multiple=True)
 
+
 async def main():
     client = HttpxClient()
-    
-    # 2. Busque a página
-    response = await client.fetch(url="http://quotes.toscrape.com")
 
-    # 3. Transforme em um parser e extraia os dados
-    parser = response.as_html_parser()
-    data = parser.extract_model(QuotesPageModel)
+    # 2. Fetch the page
+    response = await client.fetch(url="https://quotes.toscrape.com")
+
+    # 3. Turn it into a parser and extract
+    data = response.as_html_parser().extract_model(QuotesPageModel)
 
     for quote in data["quotes"][:3]:
-        print(f"Quote: {quote['text']}")
-        print(f"Author: {quote['author']['name']}")
+        print(f"{quote['text']} — {quote['author']['name']} {quote['tags']}")
 
-if __name__ == "__main__":
-    asyncio.run(main())
+
+asyncio.run(main())
 ```
 
-## ✨ Funcionalidades Principais
+## Crawling with spiders
 
-### 🔒 Descriptografia Automática
-Suporte integrado para descriptografar respostas HTTP (AES-CBC/ECB).
-
-```python
-from xcrap.core import decrypt_client
-from xcrap.utils.decryption import DecryptConfig, DecryptKeyConfig
-
-config = DecryptConfig(
-    algorithm="aes-256-cbc",
-    key=DecryptKeyConfig(value="sua-chave-aqui"),
-    iv=DecryptKeyConfig(value="seu-iv-aqui")
-)
-
-@decrypt_client(config)
-class MySecureClient(HttpxClient):
-    pass
-
-# Todas as respostas deste cliente agora virão descriptografadas!
-```
-
-### 🏭 Sistema de Factories
-O sistema de Factory permite a criação dinâmica de componentes a partir de arquivos de configuração (JSON/Dict), facilitando a manutenção de bots sem alteração de código.
-
-#### 1. Model Factory
-Constrói modelos complexos de forma recursiva:
-
-```python
-from xcrap.factory import create_extraction_model
-from xcrap.extractor import HtmlExtractionModel
-
-config = {
-    "type": "html",
-    "model": {
-        "title": {"query": {"type": "css", "value": "h1::text"}},
-        "items": {
-            "query": {"type": "css", "value": "li"},
-            "multiple": true,
-            "nested": {
-                "type": "html",
-                "model": {"name": {"query": {"type": "css", "value": "span::text"}}}
-            }
-        }
-    }
-}
-
-model = create_extraction_model(config, allowed_models={"html": HtmlExtractionModel})
-```
-
-#### 2. Client Factory
-Instancia clientes com configurações específicas:
-
-```python
-from xcrap.factory import create_client
-from xcrap.clients import HttpxClient
-
-client = create_client(
-    client_type="httpx",
-    allowed_clients={"httpx": HttpxClient},
-    options={"user_agent": "CustomAgent", "proxy_url": "http://..."}
-)
-```
-
-#### 3. Extractor Factory
-Cria extratores a partir de strings, suportando argumentos:
-
-```python
-from xcrap.factory import create_extractor
-
-# 'attr:src' chamará o gerador 'attr' com o argumento 'src'
-get_src = create_extractor("attr:src", allowed_extractors={"attr": lambda a: lambda el: el.attrib.get(a)})
-```
-
-### 🛠️ Extratores Customizados
-Você pode passar funções customizadas para processar campos individualmente:
-
-```python
-class MyModel(HtmlExtractionModel):
-    # 'extractor' permite transformar o dado logo após a captura
-    price = HtmlBaseField(
-        query=css(".price::text"), 
-        extractor=lambda text: float(text.replace("$", ""))
-    )
-```
-
-### 📊 Extração de JSON (JMESPath)
-Também suportamos extração de JSON usando JMESPath:
-
-```python
-from xcrap.extractor import JsonExtractionModel, JsonBaseField, jmes_path, JsonParser
-
-class ProjectModel(JsonExtractionModel):
-    name = JsonBaseField(query=jmes_path("title"))
-    tags = JsonBaseField(query=jmes_path("tags"), multiple=True)
-
-content = '{"title": "Xcrap", "tags": ["python", "scraping"]}'
-parser = JsonParser(content)
-data = parser.extract_model(ProjectModel) # {'name': 'Xcrap', 'tags': ['python', 'scraping']}
-```
-
-### 🕷️ Spiders
-
-Inspirados no Scrapy, mas adaptados ao Xcrap: tudo é `asyncio` nativo, o client (`HttpxClient`, `CurlCffiClient`, `PlaywrightClient`) já cuida de retry, proxy e user agent (por isso não há *downloader middlewares*) e a extração continua sendo feita pelos modelos declarativos.
+When you need to follow links, paginate and write results somewhere, let a spider drive:
 
 ```python
 from xcrap.extractor import css
@@ -157,57 +83,136 @@ from xcrap.spiders import DropItem, ItemPipeline, JsonLinesPipeline, Spider
 
 class QuotesSpider(Spider):
     name = "quotes"
-    start_urls = ["http://quotes.toscrape.com"]
+    start_urls = ["https://quotes.toscrape.com"]
     concurrency = 4
-    request_delay = 200  # ms entre requisições
+    request_delay = 200      # ms between requests
     max_retries = 2
 
     async def parse(self, response):
         parser = response.as_html_parser()
 
         for quote in parser.extract_models(QuoteModel, css("div.quote")):
-            yield quote  # dict ou modelo pydantic = item
+            yield quote                                   # a dict -> an item
 
         for href in parser.extract_values(css("li.next a::attr(href)")):
-            yield response.follow(href)  # Request = continua o crawl
-            # response.follow(href, callback="parse_other") para outro callback
+            yield response.follow(href)                   # a Request -> keep crawling
 
 
-class NoEmptyText(ItemPipeline):
+class RequireText(ItemPipeline):
     async def process_item(self, item, spider):
         if not item["text"]:
-            raise DropItem("sem texto")
+            raise DropItem("no text")
         return item
 
 
-stats = QuotesSpider(pipelines=[NoEmptyText(), JsonLinesPipeline("quotes.jsonl")]).run()
+stats = QuotesSpider(pipelines=[RequireText(), JsonLinesPipeline("quotes.jsonl")]).run()
+print(stats.items_scraped, "items in", round(stats.elapsed, 1), "s")
 ```
 
-- `await spider.crawl()` / `spider.run()` executam e devolvem `SpiderStats`; `await spider.collect()` devolve os itens e `async for item in spider.stream()` os entrega conforme chegam.
-- `Request` aceita `callback`/`errback` (função ou nome do método), `meta`, `priority`, `dont_filter`, `max_retries` e `retry_delay`.
-- Configurações da classe (ou kwargs do construtor): `concurrency`, `request_delay`, `max_retries`, `retry_delay`, `headers`, `max_requests`, `max_depth`, `dedupe`.
-- Respostas não-2xx vão para o `errback` do request ou para `Spider.on_error`; exceções em callbacks são logadas e contadas, sem parar o crawl.
-- `ModelSpider` dispensa o `parse`: defina `model`, e opcionalmente `items_query` (um item por elemento) e `follow_query` (links a seguir).
+No `parse` needed for the common case — a `ModelSpider` is configured with `model`, `items_query` and `follow_query`. See the [spiders guide](docs/spiders.md), including [how it differs from Scrapy](docs/spiders.md#differences-from-scrapy).
+
+## Choosing a client
 
 ```python
-class QuotesSpider(ModelSpider):
-    start_urls = ["http://quotes.toscrape.com"]
-    model = QuoteModel
-    items_query = css("div.quote")
-    follow_query = css("li.next a::attr(href)")
+from xcrap.clients import CurlCffiClient, HttpxClient, PlaywrightClient, SeleniumClient
+
+HttpxClient()                                   # fast default for APIs and static HTML
+CurlCffiClient(impersonate="chrome120")         # looks like a real browser to anti-bot systems
+PlaywrightClient(headless=True)                 # runs JavaScript; supports actions
+SeleniumClient(browser_type="chrome")           # WebDriver
 ```
 
-Para paginação estática, use `start_urls = paginator.dump()` com o `StaticPaginator`.
+All of them accept `max_retries`, `retry_delay` and `headers` per fetch, and `user_agent` / `proxy_url` as a string **or a callable** for rotation. Browser clients take `actions` to click, scroll or wait before the HTML is captured:
 
-## 🛠️ Desenvolvimento
+```python
+response = await PlaywrightClient().fetch(
+    url="https://quotes.toscrape.com/js-delayed/",
+    actions=[lambda page: page.wait_for_selector("div.quote")],
+)
+```
 
-Para rodar os testes e verificar a cobertura:
+More in the [clients guide](docs/clients.md).
+
+## More features
+
+**JSON with JMESPath**
+
+```python
+from xcrap.extractor import JsonBaseField, JsonExtractionModel, JsonParser, jmes_path
+
+
+class ProjectModel(JsonExtractionModel):
+    name = JsonBaseField(query=jmes_path("title"))
+    tags = JsonBaseField(query=jmes_path("tags"), multiple=True)
+
+
+JsonParser('{"title": "Xcrap", "tags": ["python", "scraping"]}').extract_model(ProjectModel)
+# {'name': 'Xcrap', 'tags': ['python', 'scraping']}
+```
+
+**Formats inside formats** — HTML → JSON → Markdown in four lines:
+
+```python
+script = response.as_html_parser().extract_value(css('script[data-target="react-app.embeddedData"]::text'))
+lines = JsonParser(script).extract_value(jmes_path('payload."codeViewBlobLayoutRoute.StyledBlob".rawLines'))
+readme = MarkdownParser("\n".join(lines))
+```
+
+**Custom extractors** receive the matched parsel `Selector`:
+
+```python
+price = HtmlBaseField(query=css(".price"), extractor=lambda el: float(el.css("::text").get().replace("$", "")))
+```
+
+**Automatic decryption** of AES-encrypted responses:
+
+```python
+from xcrap.core import decrypt_client
+from xcrap.utils.decryption import DecryptConfig, DecryptKeyConfig
+
+config = DecryptConfig(algorithm="aes-256-cbc", key=DecryptKeyConfig(value="..."), iv=DecryptKeyConfig(value="..."))
+
+@decrypt_client(config)
+class SecureClient(HttpxClient): ...
+```
+
+**Factories** build clients, extractors and models from configuration data:
+
+```python
+from xcrap.factory import create_client, create_extraction_model
+
+client = create_client("httpx", allowed_clients={"httpx": HttpxClient}, options={"user_agent": "my-bot/1.0"})
+model = create_extraction_model(
+    {"type": "html", "model": {"title": {"query": {"type": "css", "value": "h1::text"}}}},
+    allowed_models={"html": HtmlExtractionModel},
+    allowed_extractors={},
+)
+```
+
+**Rotation and pagination**: `Rotator`, `Randomizer`, `StaticPaginator` — see [utilities](docs/utilities.md).
+
+## Documentation
+
+| | |
+| --- | --- |
+| [Getting started](docs/getting-started.md) | Installation, first scraper, how the pieces fit |
+| [Clients](docs/clients.md) | All clients, retries, concurrency, proxies, actions, decryption, custom clients |
+| [Extraction](docs/extraction.md) | HTML, JSON, Markdown, composing formats, OCR |
+| [Spiders](docs/spiders.md) | Crawling, pipelines, settings, statistics, Scrapy comparison |
+| [Utilities](docs/utilities.md) | Rotator, Randomizer, StaticPaginator, errors |
+| [Factories](docs/factories.md) | Configuration-driven scrapers |
+| [Examples](examples/README.md) | 17 runnable scripts against real sites |
+
+## Development
 
 ```bash
-poetry run pytest --cov=xcrap --cov-report=term-missing
+poetry install
+poetry run pytest                                       # tests
+poetry run pytest --cov=xcrap --cov-report=term-missing # with coverage
+poetry run ruff check .
 ```
 
-Atualmente o projeto conta com **100% de cobertura de código**, garantindo a confiabilidade de todas as funcionalidades.
+The example scripts hit real websites ([quotes.toscrape.com](https://quotes.toscrape.com), [books.toscrape.com](https://books.toscrape.com), the GitHub API…) and are not part of the test suite.
 
 ---
-Feito com ❤️ por Marcuth <contact@marcuth.dev>
+Made with ❤️ by Marcuth <contact@marcuth.dev>
