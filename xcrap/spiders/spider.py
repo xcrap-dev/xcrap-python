@@ -235,6 +235,9 @@ class Spider:
 
     async def _handle_output(self, result: Any, parent: Request) -> None:
         async for output in _flatten(result):
+            if output is None:
+                continue
+
             if isinstance(output, Request):
                 self._schedule(output, parent)
             else:
