@@ -163,3 +163,8 @@ def test_fingerprint_ignores_fragment_and_query_order():
     a = fingerprint(Request("http://x.test/p?b=2&a=1#top"))
     b = fingerprint(Request("http://X.test/p?a=1&b=2"))
     assert a == b
+
+
+async def test_fake_client_does_not_support_fetch_many():
+    with pytest.raises(NotImplementedError):
+        await FakeClient(PAGES).fetch_many([], None, None)

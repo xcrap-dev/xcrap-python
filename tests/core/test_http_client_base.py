@@ -131,3 +131,11 @@ def test_http_client_base_abstracts() -> None:
         loop.run_until_complete(bo.fetch_many([], 0, 0))
     finally:
         loop.close()
+
+
+@pytest.mark.asyncio
+async def test_execute_request_through_fetch_many_keeps_order() -> None:
+    client = MockHttpClient()
+    responses = await client.fetch_many([{"url": "https://a.test"}, {"url": "https://b.test"}], request_delay=1)
+
+    assert [r.body for r in responses] == ["Content from https://a.test", "Content from https://b.test"]

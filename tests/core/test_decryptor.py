@@ -124,3 +124,11 @@ async def test_inject_decryptor_no_decrypt_on_fail(decrypt_config):
     assert resp.status == 404
     assert resp.body == "error"
     assert resp.headers.get("x-xcrap-decrypted") is None
+
+
+@pytest.mark.asyncio
+async def test_mock_client_stubs_are_callable():
+    client = MockClient()
+
+    assert await client.fetch("https://a.test") is None
+    assert await client.fetch_many([]) is None
