@@ -7,7 +7,7 @@ Xcrap is a **web scraping framework**: it gives you the pieces to fetch pages, e
 | Guide | You will learn |
 | --- | --- |
 | [Getting started](getting-started.md) | Installation, optional extras, your first scraper, and the mental model behind the framework |
-| [Clients](clients.md) | Fetching pages: `HttpxClient`, `CurlCffiClient`, `PlaywrightClient`, `SeleniumClient`, retries, concurrency, proxies, user agents, decryption, writing your own client |
+| [Clients](clients.md) | Fetching pages: `HttpxClient`, `CurlCffiClient`, `PlaywrightClient`, `SeleniumClient`, `SeleniumBaseClient`, retries, concurrency, proxies, user agents, decryption, writing your own client |
 | [Extraction](extraction.md) | Turning documents into data: HTML, JSON, Markdown, nesting formats inside each other, custom extractors, OCR |
 | [Spiders](spiders.md) | Crawling: `Spider`, `ModelSpider`, requests, callbacks, pipelines, settings, stats — and how it differs from Scrapy |
 | [Utilities](utilities.md) | `Rotator`, `Randomizer`, `StaticPaginator`, the error hierarchy |
@@ -20,8 +20,8 @@ Xcrap is a **web scraping framework**: it gives you the pieces to fetch pages, e
             ┌──────────┐   HttpResponse   ┌──────────────┐   dicts / lists   ┌────────────┐
  URL ─────► │  Client  │ ───────────────► │ Parser/Model │ ────────────────► │ your code  │
             └──────────┘                  └──────────────┘                   └────────────┘
-         httpx · curl-cffi                 HTML · JSON · Markdown            (or pipelines
-         playwright · selenium             css · xpath · jmespath             when using a Spider)
+    httpx · curl-cffi · playwright         HTML · JSON · Markdown            (or pipelines
+    selenium · seleniumbase                css · xpath · jmespath             when using a Spider)
 
  A Spider drives this loop for you: it schedules requests, runs callbacks, follows links,
  de-duplicates URLs, throttles, counts everything and feeds items to pipelines.

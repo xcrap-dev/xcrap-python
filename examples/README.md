@@ -30,6 +30,7 @@ Sites change. If one stops working, the *technique* shown is still valid — ada
 | [`12_client_playwright.py`](12_client_playwright.py) | quotes.toscrape.com/js-delayed | JavaScript rendering and `actions` | `xcrap[playwright]` + `playwright install chromium` |
 | [`13_rotation_and_factories.py`](13_rotation_and_factories.py) | httpbin.org, quotes.toscrape.com | `Rotator`, `Randomizer`, `create_client`, `create_extraction_model` | |
 | [`14_decryption.py`](14_decryption.py) | offline | AES response decryption | |
+| [`15_client_seleniumbase.py`](15_client_seleniumbase.py) | quotes.toscrape.com/js, bot.sannysoft.com | Undetected browsing and SeleniumBase actions | `xcrap[seleniumbase]` + Chrome |
 
 ## Spiders
 

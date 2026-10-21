@@ -8,9 +8,10 @@ A **client** fetches a URL and gives you an [`HttpResponse`](#httpresponse). All
 | `CurlCffiClient` | `curl-cffi` | The site blocks Python's TLS fingerprint (Cloudflare and friends) | `curl` |
 | `PlaywrightClient` | Playwright | Content is rendered by JavaScript, or you need to click/scroll/type | `playwright` |
 | `SeleniumClient` | Selenium WebDriver | You already depend on WebDriver | `selenium` |
+| `SeleniumBaseClient` | [SeleniumBase](https://seleniumbase.io) (UC mode) | The site actively detects automation: Cloudflare Turnstile, CAPTCHAs, fingerprinting | `seleniumbase` |
 
 ```python
-from xcrap.clients import CurlCffiClient, HttpxClient, PlaywrightClient, SeleniumClient
+from xcrap.clients import CurlCffiClient, HttpxClient, PlaywrightClient, SeleniumBaseClient, SeleniumClient
 ```
 
 ## Fetching
@@ -56,7 +57,7 @@ What counts as a failure depends on the client:
 | Client | Retries on |
 | --- | --- |
 | `HttpxClient` | Exceptions **and** non-2xx statuses. After the last attempt you get the real status/body of the failing response (or status `500` with the error message for exceptions) |
-| `CurlCffiClient`, `PlaywrightClient`, `SeleniumClient` | Exceptions only (timeouts, connection errors, driver errors). A 404 page is returned as-is with its status; after the last attempt you get status `500` with an empty body |
+| `CurlCffiClient`, `PlaywrightClient`, `SeleniumClient`, `SeleniumBaseClient` | Exceptions only (timeouts, connection errors, driver errors). A 404 page is returned as-is with its status; after the last attempt you get status `500` with an empty body |
 
 `HttpxClient` follows redirects.
 
@@ -109,7 +110,7 @@ The default user agent is a recent desktop Chrome string (`xcrap.utils.DEFAULT_U
 
 How proxies are applied:
 
-- `CurlCffiClient`, `PlaywrightClient`, `SeleniumClient` use `proxy_url` (or `proxy` if it is unset) as a regular proxy server.
+- `CurlCffiClient`, `PlaywrightClient`, `SeleniumClient`, `SeleniumBaseClient` use `proxy_url` (or `proxy` if it is unset) as a regular proxy server.
 - `HttpxClient` treats `proxy_url` as a **URL prefix** (the "forwarding proxy" style used by web proxies and Node Xcrap: the request goes to `f"{proxy_url}{url}"`). Its `proxy` argument is currently not applied.
 
 ## CurlCffiClient
@@ -150,7 +151,48 @@ response = await PlaywrightClient().fetch(
 
 With Playwright, actions may be sync or `async` (coroutines are awaited) and receive the Playwright `Page`. With Selenium they are synchronous and receive the WebDriver (the call runs in a worker thread via `asyncio.to_thread`). Note that Selenium cannot see HTTP status codes, so its responses always report `200`.
 
-Complete example: [`examples/12_client_playwright.py`](../examples/12_client_playwright.py). To use actions from a spider, see [Spiders → Using other clients](spiders.md#using-other-clients).
+Complete example: [`examples/12_client_playwright.py`](../examples/12_client_playwright.py).
+
+## SeleniumBaseClient
+
+[SeleniumBase](https://seleniumbase.io) wraps Selenium with a **UC (undetected-chromedriver) mode**: a patched Chrome that hides the usual automation fingerprints (`navigator.webdriver`, driver variables…) and can pass challenges such as Cloudflare Turnstile. Choose it when `PlaywrightClient`/`SeleniumClient` get blocked.
+
+```python
+client = SeleniumBaseClient(
+    browser_type="chrome",     # SeleniumBase browser name
+    headless=True,
+    uc=True,                   # undetected mode (default). False -> a plain driver.get()
+    reconnect_time=3.0,        # seconds the driver stays disconnected while challenges run
+    timeout=30.0,              # page load timeout
+    driver_options={"incognito": True},   # any other seleniumbase.Driver(...) argument
+)
+response = await client.fetch(url="https://example.com")
+```
+
+How it behaves:
+
+- In UC mode the page is opened with `driver.uc_open_with_reconnect(url, reconnect_time)`: the driver disconnects while the site's bot checks run, then reconnects. Raise `reconnect_time` for slow challenges.
+- `user_agent`, `proxy_url`/`proxy` are applied like in the other clients. SeleniumBase wants proxies as `host:port` or `user:pass@host:port`, so a scheme (`http://`) is stripped for you.
+- Like `SeleniumClient`, it reports status `200` for any rendered page (WebDriver cannot read HTTP status or response headers), and `headers=` passed to `fetch()` are not applied. Failures (driver crash, timeout) are retried according to `max_retries`, then returned as status `500`.
+- Each `fetch()` starts and quits its own browser, run in a worker thread; keep `concurrency` low.
+
+### Actions
+
+Same `actions=` contract as the other browser clients (a bare callable runs after navigation; dicts with `"type": "before_request" | "after_request"` choose the moment), but they receive the **SeleniumBase driver**, which adds anti-bot helpers on top of the WebDriver API:
+
+```python
+response = await client.fetch(
+    url="https://protected.example.com",
+    actions=[
+        lambda driver: driver.uc_gui_click_captcha(),                 # click a CAPTCHA / Turnstile checkbox
+        lambda driver: driver.execute_script("window.scrollTo(0, document.body.scrollHeight)"),
+    ],
+)
+```
+
+`uc_gui_click_captcha()` and friends use GUI automation, so they need a real (non-headless) display: pass `headless=False` when you rely on them.
+
+Runnable: [`examples/15_client_seleniumbase.py`](../examples/15_client_seleniumbase.py). Tip: SeleniumBase downloads a matching driver the first time it runs, so the first fetch is slower. To use actions from a spider, see [Spiders → Using other clients](spiders.md#using-other-clients).
 
 ## Decrypting responses
 

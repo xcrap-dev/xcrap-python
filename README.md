@@ -5,7 +5,7 @@
 This is the Python port of the Node.js [Xcrap](https://github.com/Xcrap-Cloud) framework, keeping the same concepts and vocabulary so scrapers translate between the two.
 
 - **Declarative extraction** — describe the shape of your data with models, not loops of selectors.
-- **Interchangeable clients** — `httpx`, `curl-cffi` (anti-bot TLS impersonation), Playwright and Selenium behind one interface.
+- **Interchangeable clients** — `httpx`, `curl-cffi` (anti-bot TLS impersonation), Playwright, Selenium and SeleniumBase (undetected mode) behind one interface.
 - **Every format, and formats inside formats** — HTML (CSS/XPath), JSON (JMESPath), Markdown; e.g. Markdown inside JSON inside a `<script>` tag.
 - **Spiders** — scheduler, de-duplication, concurrency, throttling, retries, pipelines and stats.
 - **Configuration-driven** — build clients and models from JSON with factories.
@@ -27,6 +27,7 @@ Optional extras:
 pip install "xcrap[curl]"        # CurlCffiClient: TLS fingerprint impersonation (Cloudflare & co.)
 pip install "xcrap[playwright]"  # PlaywrightClient: JavaScript rendering (then: playwright install chromium)
 pip install "xcrap[selenium]"    # SeleniumClient: WebDriver automation
+pip install "xcrap[seleniumbase]" # SeleniumBaseClient: undetected (UC) mode for bot-protected sites
 pip install "xcrap[ocr]"         # Text from images (requires the Tesseract binary)
 pip install "xcrap[all]"         # everything
 ```
@@ -114,12 +115,13 @@ No `parse` needed for the common case — a `ModelSpider` is configured with `mo
 ## Choosing a client
 
 ```python
-from xcrap.clients import CurlCffiClient, HttpxClient, PlaywrightClient, SeleniumClient
+from xcrap.clients import CurlCffiClient, HttpxClient, PlaywrightClient, SeleniumBaseClient, SeleniumClient
 
 HttpxClient()                                   # fast default for APIs and static HTML
 CurlCffiClient(impersonate="chrome120")         # looks like a real browser to anti-bot systems
 PlaywrightClient(headless=True)                 # runs JavaScript; supports actions
 SeleniumClient(browser_type="chrome")           # WebDriver
+SeleniumBaseClient(uc=True)                     # undetected Chrome: Cloudflare, CAPTCHAs
 ```
 
 All of them accept `max_retries`, `retry_delay` and `headers` per fetch, and `user_agent` / `proxy_url` as a string **or a callable** for rotation. Browser clients take `actions` to click, scroll or wait before the HTML is captured:
@@ -201,7 +203,7 @@ model = create_extraction_model(
 | [Spiders](docs/spiders.md) | Crawling, pipelines, settings, statistics, Scrapy comparison |
 | [Utilities](docs/utilities.md) | Rotator, Randomizer, StaticPaginator, errors |
 | [Factories](docs/factories.md) | Configuration-driven scrapers |
-| [Examples](examples/README.md) | 17 runnable scripts against real sites |
+| [Examples](examples/README.md) | 18 runnable scripts against real sites |
 
 ## Development
 

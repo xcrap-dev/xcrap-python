@@ -15,6 +15,7 @@ The core install is light (`httpx`, `parsel`, `jmespath`, `pydantic`, `markdown`
 | `xcrap[curl]` | `curl-cffi` | `CurlCffiClient` — browser TLS/HTTP2 impersonation for anti-bot protected sites |
 | `xcrap[playwright]` | `playwright` | `PlaywrightClient` — JavaScript rendering. Then run `playwright install chromium` |
 | `xcrap[selenium]` | `selenium` | `SeleniumClient` — WebDriver automation |
+| `xcrap[seleniumbase]` | `seleniumbase` | `SeleniumBaseClient` — Selenium with UC (undetected) mode for bot-protected sites |
 | `xcrap[ocr]` | `pytesseract`, `pillow` | `xcrap.ocr` — text from images. Needs the [Tesseract](https://github.com/tesseract-ocr/tesseract) binary installed |
 | `xcrap[all]` | all of the above | |
 
