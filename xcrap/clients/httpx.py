@@ -20,7 +20,7 @@ class HttpxClient(HttpClientBase):
         user_agent: Optional[str | Callable[[], str]] = None,
     ) -> None:
         super().__init__(proxy_url, proxy, user_agent)
-        self.httpx_client = httpx.AsyncClient()
+        self.httpx_client = httpx.AsyncClient(follow_redirects=True)
 
     async def fetch(
         self,
