@@ -4,8 +4,21 @@ version = "0.1.0"
 description = "A modern, declarative, and modular web scraping framework for Python."
 authors = ["Marcuth <contact@marcuth.dev>"]
 readme = "README.md"
-repository = "https://github.com/Xcrap-Cloud/xcrap-python"
-keywords = ["scraping", "crawler", "pydantic", "parsel", "html"]
+license = "MIT"
+repository = "https://github.com/xcrap-dev/xcrap-python"
+homepage = "https://github.com/xcrap-dev/xcrap-python"
+documentation = "https://github.com/xcrap-dev/xcrap-python/tree/master/docs"
+keywords = ["scraping", "crawler", "spider", "framework", "asyncio", "pydantic", "parsel", "html", "json", "markdown"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Framework :: AsyncIO",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Internet :: WWW/HTTP :: Indexing/Search",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
 
 
 [tool.poetry.dependencies]
