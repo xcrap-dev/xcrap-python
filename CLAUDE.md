@@ -20,7 +20,7 @@ poetry lock                            # required after editing dependencies/ext
 - Tests never touch the network. `examples/*.py` do (quotes.toscrape.com, books.toscrape.com, GitHub, …) and are run manually: `poetry run python examples/20_spider_callbacks.py` (set `PYTHONIOENCODING=utf-8` on Windows).
 - Ruff: line length 134, `E501` ignored under `tests/`. `.pre-commit-config.yaml` runs ruff on commit; CI (`.github/workflows/ci.yml`) runs lint, format check, tests with coverage, and a wheel smoke test.
 - The version lives in **two places** that must be bumped together: `pyproject.toml` and `xcrap/__init__.py` (`__version__`).
-- Docs (`README.md`, `docs/`, `examples/`) are written in English.
+- Docs (`README.md`, `docs/`, `examples/`, `skills/`) are written in English. Keep the Agent Skills in `skills/` in sync when the public API changes.
 
 ## Architecture
 

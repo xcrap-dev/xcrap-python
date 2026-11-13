@@ -213,6 +213,23 @@ model = create_extraction_model(
 | [Factories](docs/factories.md) | Configuration-driven scrapers |
 | [Examples](examples/README.md) | 19 runnable scripts against real sites |
 
+## AI Agent Skills
+
+The repository ships [Agent Skills](https://agentskills.io) that teach AI coding agents (Claude Code, Cursor, Codex, …) how to use Xcrap for Python correctly. They live in [`skills/`](skills):
+
+| Skill | What it covers |
+| --- | --- |
+| [`xcrap-python`](skills/xcrap-python/SKILL.md) | How to use the framework: clients, extraction models (HTML, JSON, Markdown, XML), pydantic validation, spiders, pipelines, pagination, factories. Detailed references in [`skills/xcrap-python/references`](skills/xcrap-python/references). |
+| [`xcrap-python-best-practices`](skills/xcrap-python-best-practices/SKILL.md) | Conventions, project layout, resilient selectors, testing with fixtures, debugging checklist and common mistakes. |
+
+Install them with the [`skills`](https://github.com/vercel-labs/skills) CLI:
+
+```bash
+npx skills add Xcrap-Cloud/xcrap-python
+```
+
+Or copy the folders into your agent's skills directory (for Claude Code: `.claude/skills/`).
+
 ## Development
 
 ```bash
