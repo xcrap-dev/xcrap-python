@@ -51,3 +51,19 @@ def test_http_response_as_html_parser() -> None:
     res = HttpResponse(200, "OK", "<html></html>", {})
     parser = res.as_html_parser()
     assert isinstance(parser, HtmlParser)
+
+
+def test_http_response_as_xml_parser() -> None:
+    from xcrap.extractor import XmlParser, xpath
+
+    body = '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>https://a</loc></url></urlset>'
+    res = HttpResponse(200, "OK", body, {"content-type": "application/xml"})
+
+    parser = res.as_xml_parser()
+    stripped = res.as_xml_parser(remove_namespaces=True)
+    prefixed = res.as_xml_parser(namespaces={"s": "http://www.sitemaps.org/schemas/sitemap/0.9"})
+
+    assert isinstance(parser, XmlParser)
+    assert parser.extract_value(xpath("//loc/text()")) is None
+    assert stripped.extract_value(xpath("//loc/text()")) == "https://a"
+    assert prefixed.extract_value(xpath("//s:loc/text()")) == "https://a"

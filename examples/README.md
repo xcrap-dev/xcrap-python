@@ -20,6 +20,7 @@ Sites change. If one stops working, the *technique* shown is still valid — ada
 | [`04_json_inside_html.py`](04_json_inside_html.py) | quotes.toscrape.com/js | JSON living in a `<script>` tag |
 | [`05_markdown_inside_json.py`](05_markdown_inside_json.py) | GitHub API | Markdown inside a JSON field |
 | [`06_markdown_in_json_in_script.py`](06_markdown_in_json_in_script.py) | github.com | HTML → `<script>` JSON → Markdown |
+| [`07_xml_feeds.py`](07_xml_feeds.py) | GitHub releases Atom feed | `XmlParser`, `XmlExtractionModel`, namespaces, `remove_namespaces`, HTML inside XML |
 
 ## Clients and utilities
 

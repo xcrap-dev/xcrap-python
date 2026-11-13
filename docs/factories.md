@@ -68,9 +68,9 @@ model = create_extraction_model(
 data = model.extract(html)
 ```
 
-Field definition keys: `query` (`{"type": "css" | "xpath" | "jmes_path", "value": "..."}`), `multiple`, `limit`, `default`, `extractor` (a string resolved by `create_extractor`; HTML models only) and `nested`.
+Field definition keys: `query` (`{"type": "css" | "xpath" | "jmes_path", "value": "..."}`), `multiple`, `limit`, `default`, `extractor` (a string resolved by `create_extractor`; HTML and XML models only) and `nested`.
 
-The `type` selects the class: an `HtmlExtractionModel` subclass produces `HtmlBaseField`/`HtmlNestedField`s, a `JsonExtractionModel` subclass produces the JSON equivalents, so the same configuration style covers both formats (a `MarkdownExtractionModel` works like HTML).
+The `type` selects the class: an `HtmlExtractionModel` subclass produces `HtmlBaseField`/`HtmlNestedField`s, a `JsonExtractionModel` subclass produces the JSON equivalents and an `XmlExtractionModel` subclass the XML ones, so the same configuration style covers every format (a `MarkdownExtractionModel` works like HTML). XML model configs also accept `"namespaces": {"prefix": "uri"}` and `"remove_namespaces": true` next to `type`. A model class that is none of these raises `ValueError`.
 
 The result is an ordinary model **instance**: call `model.extract(content)` (HTML string, `Selector` or, for JSON models, a string/`dict`/`list`), or use it as the `model=` of a nested field. Parser helpers such as `parser.extract_model()` expect a model *class*, so with factory-built models call `model.extract()` yourself.
 

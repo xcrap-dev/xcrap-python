@@ -75,6 +75,7 @@ What counts as a failure depends on the client:
 | `as_html_parser()` | → [`HtmlParser`](extraction.md#html) |
 | `as_json_parser()` | → [`JsonParser`](extraction.md#json) |
 | `as_markdown_parser()` | → [`MarkdownParser`](extraction.md#markdown) |
+| `as_xml_parser(namespaces=None, remove_namespaces=False)` | → [`XmlParser`](extraction.md#xml) |
 | `as_parser(MyParser)` | Any `SourceParser` subclass |
 
 ## Many requests at once

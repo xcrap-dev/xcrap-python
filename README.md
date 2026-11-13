@@ -8,13 +8,13 @@
 [![Code style: Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![License: MIT](https://img.shields.io/pypi/l/xcrap.svg)](LICENSE)
 
-**Xcrap is a modern web scraping framework.** It gives you interchangeable HTTP and browser clients, declarative extraction for HTML, JSON and Markdown, and Scrapy-inspired spiders for crawling whole sites — with one consistent, `asyncio`-native API.
+**Xcrap is a modern web scraping framework.** It gives you interchangeable HTTP and browser clients, declarative extraction for HTML, JSON, Markdown and XML, and Scrapy-inspired spiders for crawling whole sites — with one consistent, `asyncio`-native API.
 
 This is the Python port of the Node.js [Xcrap](https://github.com/Xcrap-Cloud) framework, keeping the same concepts and vocabulary so scrapers translate between the two.
 
 - **Declarative extraction** — describe the shape of your data with models, not loops of selectors.
 - **Interchangeable clients** — `httpx`, `curl-cffi` (anti-bot TLS impersonation), Playwright, Selenium and SeleniumBase (undetected mode) behind one interface.
-- **Every format, and formats inside formats** — HTML (CSS/XPath), JSON (JMESPath), Markdown; e.g. Markdown inside JSON inside a `<script>` tag.
+- **Every format, and formats inside formats** — HTML (CSS/XPath), JSON (JMESPath), Markdown, XML (RSS, Atom, sitemaps); e.g. Markdown inside JSON inside a `<script>` tag.
 - **Spiders** — scheduler, de-duplication, concurrency, throttling, retries, pipelines and stats.
 - **Configuration-driven** — build clients and models from JSON with factories.
 - **Batteries included** — user-agent/proxy rotation, static pagination, AES response decryption, OCR.
@@ -207,11 +207,11 @@ model = create_extraction_model(
 | --- | --- |
 | [Getting started](docs/getting-started.md) | Installation, first scraper, how the pieces fit |
 | [Clients](docs/clients.md) | All clients, retries, concurrency, proxies, actions, decryption, custom clients |
-| [Extraction](docs/extraction.md) | HTML, JSON, Markdown, composing formats, OCR |
+| [Extraction](docs/extraction.md) | HTML, JSON, Markdown, XML, composing formats, OCR |
 | [Spiders](docs/spiders.md) | Crawling, pipelines, settings, statistics, Scrapy comparison |
 | [Utilities](docs/utilities.md) | Rotator, Randomizer, StaticPaginator, errors |
 | [Factories](docs/factories.md) | Configuration-driven scrapers |
-| [Examples](examples/README.md) | 18 runnable scripts against real sites |
+| [Examples](examples/README.md) | 19 runnable scripts against real sites |
 
 ## Development
 

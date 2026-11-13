@@ -1,6 +1,6 @@
 # Extraction
 
-Extraction turns a document (HTML, JSON, Markdown) into plain Python data. There are two levels:
+Extraction turns a document (HTML, JSON, Markdown, XML) into plain Python data. There are two levels:
 
 - **Parsers** answer ad-hoc questions: *what is the text of this selector?*
 - **Models** describe a whole structure once: *a page has a title and a list of quotes, each with an author…*
@@ -13,8 +13,8 @@ Three tiny helpers build a `QueryConfig` (`{"type": ..., "value": ...}`):
 
 | Helper | Language | Used with |
 | --- | --- | --- |
-| `css("div.quote a::attr(href)")` | CSS selectors with `::text` / `::attr(name)` pseudo-elements | HTML, Markdown |
-| `xpath("//h1/text()")` | XPath 1.0 | HTML, Markdown |
+| `css("div.quote a::attr(href)")` | CSS selectors with `::text` / `::attr(name)` pseudo-elements | HTML, Markdown, XML |
+| `xpath("//h1/text()")` | XPath 1.0 | HTML, Markdown, XML |
 | `jmes_path("quotes[].author.name")` | [JMESPath](https://jmespath.org) | JSON |
 
 ```python
@@ -96,7 +96,7 @@ class PageModel(HtmlExtractionModel):
     footer = HtmlNestedField(query=css("footer"), model=FooterModel)     # single nested object
 ```
 
-Nested queries are relative to the matched element, so `css("span.text::text")` inside `QuoteModel` only sees that quote.
+Nested queries are relative to the matched element, so `css("span.text::text")` inside `QuoteModel` only sees that quote. **XPath is the exception**: an expression starting with `//` searches the whole document even inside a nested model. Use `.//span` (or `span/text()`) for a path relative to the element.
 
 #### Inheritance and dynamic shapes
 
@@ -162,6 +162,66 @@ ReadmeModel().extract(markdown_text)
 ```
 
 `parser.markdown_source` keeps the original text. Runnable: [`examples/03_markdown.py`](../examples/03_markdown.py).
+
+## XML
+
+RSS, Atom, sitemaps, SOAP and other XML documents use `XmlParser` and `XmlExtractionModel`. They mirror the HTML API (same methods, same field options, CSS and XPath queries), parse with lxml's XML parser (case-sensitive names, no HTML repair) and never resolve external entities.
+
+```python
+from xcrap.extractor import XmlBaseField, XmlExtractionModel, XmlNestedField, XmlParser, xpath
+
+
+class ItemModel(XmlExtractionModel):
+    title = XmlBaseField(query=xpath("title/text()"))
+    url = XmlBaseField(query=xpath("link/text()"))
+    published = XmlBaseField(query=xpath("pubDate/text()"))
+    categories = XmlBaseField(query=xpath("category/text()"), multiple=True)
+
+
+class FeedModel(XmlExtractionModel):
+    title = XmlBaseField(query=xpath("/rss/channel/title/text()"))
+    items = XmlNestedField(query=xpath("//item"), model=ItemModel, multiple=True, limit=20)
+
+
+parser = XmlParser(feed_xml)                 # str or bytes, or response.as_xml_parser()
+parser.extract_model(FeedModel)
+parser.extract_models(ItemModel, xpath("//item"))
+parser.extract_values(xpath("//item/title/text()"))
+```
+
+Item queries are relative (`title/text()`), because `//title` would also match the channel title (see the XPath note in [Models](#htmlnestedfield)). Elements without `text()`/`::text` come back serialized as XML, including the namespace declarations in scope; select `text()`, `string(.)` or `normalize-space(.)` when you want text. CDATA sections are read as text, so an HTML `<description>` can be fed to `HtmlParser` or to a nested `HtmlExtractionModel` through `extractor=`.
+
+### Namespaces
+
+Atom, sitemaps and media RSS put their elements in XML namespaces, and an unprefixed XPath (`//entry`) does not match a namespaced element. Three ways to deal with it:
+
+```python
+# 1. Register prefixes (on the parser, the model class, or the model constructor)
+parser = XmlParser(atom, namespaces={"atom": "http://www.w3.org/2005/Atom"})
+parser.extract_values(xpath("//atom:entry/atom:title/text()"))
+
+
+class MediaItem(XmlExtractionModel):
+    namespaces = {"media": "http://search.yahoo.com/mrss/"}
+    image = XmlBaseField(query=xpath("media:content/@url"))
+
+
+# 2. Strip every namespace (simplest for sitemaps and Atom; also makes CSS work)
+XmlParser(sitemap, remove_namespaces=True).extract_values(css("url loc::text"))
+
+
+class SitemapModel(XmlExtractionModel):
+    remove_namespaces = True
+    urls = XmlBaseField(query=xpath("//url/loc/text()"), multiple=True)
+
+
+# 3. Match on the local name, without any setup
+XmlParser(sitemap).extract_values(xpath("//*[local-name()='loc']/text()"))
+```
+
+A model registers its `namespaces` on the selector it receives, so nested models can declare their own. `remove_namespaces` only applies when the model parses the document itself (a string or bytes); a nested model works on whatever its parent parsed.
+
+Runnable: [`examples/07_xml_feeds.py`](../examples/07_xml_feeds.py).
 
 ## Composing formats
 
@@ -234,4 +294,5 @@ The extractor reads the element's `src` (or `data-src`) and opens it as a **loca
 | A list of simple values | `parser.extract_values` |
 | A repeated block with several fields | `extract_models(Model, query)` |
 | A whole page structure | `extract_model(PageModel)` with nested fields |
+| A feed or sitemap | `XmlParser` + `XmlExtractionModel` |
 | Structure defined outside the code | [Factories](factories.md) |

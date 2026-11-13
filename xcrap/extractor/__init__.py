@@ -6,6 +6,8 @@ from .markdown_extraction_model import MarkdownExtractionModel
 from .markdown_parser import MarkdownParser, render_markdown_to_html
 from .query_builders import QueryConfig, css, jmes_path, xpath
 from .source_parser import SourceParser
+from .xml_extraction_model import XmlBaseField, XmlExtractionModel, XmlNestedField, create_xml_selector
+from .xml_parser import XmlParser
 
 __all__ = [
     "css",
@@ -22,6 +24,11 @@ __all__ = [
     "MarkdownParser",
     "MarkdownExtractionModel",
     "render_markdown_to_html",
+    "XmlParser",
+    "XmlExtractionModel",
+    "XmlBaseField",
+    "XmlNestedField",
+    "create_xml_selector",
     "SourceParser",
     "QueryConfig",
 ]

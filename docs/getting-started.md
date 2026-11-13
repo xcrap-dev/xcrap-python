@@ -96,7 +96,7 @@ class QuotesSpider(Spider):
 xcrap/
 ├── clients/     HttpxClient, CurlCffiClient, PlaywrightClient, SeleniumClient
 ├── core/        HttpClientBase, HttpResponse, errors, decryptor
-├── extractor/   HtmlParser, JsonParser, MarkdownParser, extraction models, css/xpath/jmes_path
+├── extractor/   HtmlParser, JsonParser, MarkdownParser, XmlParser, extraction models, css/xpath/jmes_path
 ├── spiders/     Spider, ModelSpider, Request, SpiderResponse, pipelines, scheduler, stats
 ├── factory/     create_client, create_extractor, create_extraction_model
 ├── utils/       Rotator, Randomizer, StaticPaginator, decryption helpers

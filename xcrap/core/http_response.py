@@ -59,6 +59,11 @@ class HttpResponse:
 
         return MarkdownParser(self.body)
 
+    def as_xml_parser(self, namespaces: Optional[dict[str, str]] = None, remove_namespaces: bool = False):
+        from ..extractor.xml_parser import XmlParser
+
+        return XmlParser(self.body, namespaces=namespaces, remove_namespaces=remove_namespaces)
+
 
 __all__ = [
     "HttpResponse",
